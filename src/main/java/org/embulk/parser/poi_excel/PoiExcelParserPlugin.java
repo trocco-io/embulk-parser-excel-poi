@@ -24,6 +24,7 @@ import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorFactory;
 import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorValue;
 import org.embulk.spi.Exec;
 import org.embulk.spi.FileInput;
+import org.embulk.spi.Page;
 import org.embulk.spi.PageBuilder;
 import org.embulk.spi.PageOutput;
 import org.embulk.spi.ParserPlugin;
@@ -233,6 +234,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
         }
 
         try (FileInputInputStream is = new FileInputInputStream(input)) {
+            final PageOutput neverFinishOutput = new OnlyAddPageOutput(output); // never finish while iterating files
             while (is.nextFile()) {
                 Workbook workbook;
                 try {
@@ -245,8 +247,9 @@ public class PoiExcelParserPlugin implements ParserPlugin {
                 if (log.isDebugEnabled()) {
                     log.debug("resolved sheet names={}", list);
                 }
-                run(task, schema, input, workbook, list, output);
+                run(task, schema, input, workbook, list, neverFinishOutput);
             }
+            output.finish(); // explicitly finish at the end
         }
     }
 
@@ -295,6 +298,30 @@ public class PoiExcelParserPlugin implements ParserPlugin {
             }
         }
         return new ArrayList<>(set);
+    }
+
+    // Wrapper for output that only add page
+    private static class OnlyAddPageOutput implements PageOutput {
+        private final PageOutput output;
+
+        OnlyAddPageOutput(PageOutput output) {
+            this.output = output;
+        }
+
+        @Override
+        public void add(Page page) {
+            output.add(page);
+        }
+
+        @Override
+        public void finish() {
+            // do nothing
+        }
+
+        @Override
+        public void close() {
+            // do nothing
+        }
     }
 
     protected void run(PluginTask task, Schema schema, FileInput input, Workbook workbook, List<String> sheetNames, PageOutput output) {
