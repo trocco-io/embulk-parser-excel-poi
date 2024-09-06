@@ -300,7 +300,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
     protected void run(PluginTask task, Schema schema, FileInput input, Workbook workbook, List<String> sheetNames, PageOutput output) {
         final int flushCount = task.getFlushCount();
 
-        try (PageBuilder pageBuilder = Exec.getPageBuilder(Exec.getBufferAllocator(), schema, output)) {
+        try (PageBuilder pageBuilder = new PageBuilder(Exec.getBufferAllocator(), schema, output)) {
             for (String sheetName : sheetNames) {
                 Sheet sheet = workbook.getSheet(sheetName);
                 if (sheet == null) {
