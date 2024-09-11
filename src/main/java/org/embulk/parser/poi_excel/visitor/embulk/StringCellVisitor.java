@@ -1,5 +1,6 @@
 package org.embulk.parser.poi_excel.visitor.embulk;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 
 import org.apache.poi.ss.usermodel.FormulaError;
@@ -31,7 +32,10 @@ public class StringCellVisitor extends CellVisitor {
             }
         }
 
-        String s = Double.toString(value);
+        // Use toPlainString to avoid scientific notation
+        String s = BigDecimal.valueOf(value).toPlainString();
+        // Remove the trailing zeros of the zero scale value
+        // See: https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html#toPlainString--
         if (s.endsWith(".0")) {
             return s.substring(0, s.length() - 2);
         }
