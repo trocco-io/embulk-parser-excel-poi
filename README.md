@@ -7,7 +7,7 @@ This plugin uses Apache POI.
 
 * **Plugin type**: parser
 * **Guess supported**: no
-* Embulk 0.10 or later
+* Embulk 0.9 or earlier
 
 
 ## Example
