@@ -35,7 +35,7 @@ public class TimestampCellVisitor extends CellVisitor {
         TimeZone timeZone = getTimestampParser(column).zone();
         Date date = DateUtil.getJavaDate(value, timeZone);
         Instant timestamp = Instant.ofEpochMilli(date.getTime());
-        pageBuilder.setTimestamp(column, timestamp);
+        pageBuilder.setTimestamp(column, org.embulk.spi.time.Timestamp.ofInstant(timestamp));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class TimestampCellVisitor extends CellVisitor {
             doConvertError(column, value, e);
             return;
         }
-        pageBuilder.setTimestamp(column, timestamp);
+        pageBuilder.setTimestamp(column, org.embulk.spi.time.Timestamp.ofInstant(timestamp));
     }
 
     @Override
@@ -63,7 +63,7 @@ public class TimestampCellVisitor extends CellVisitor {
 
     @Override
     public void visitValueLong(Column column, Object source, long value) {
-        pageBuilder.setTimestamp(column, Instant.ofEpochMilli(value));
+        pageBuilder.setTimestamp(column, org.embulk.spi.time.Timestamp.ofInstant(Instant.ofEpochMilli(value)));
     }
 
     @Override
@@ -91,7 +91,7 @@ public class TimestampCellVisitor extends CellVisitor {
     protected void doConvertErrorConstant(Column column, String value) throws Exception {
         TimestampFormatter formatter = getTimestampParser(column).formatter();
         Instant timestamp = formatter.parse(value);
-        pageBuilder.setTimestamp(column, timestamp);
+        pageBuilder.setTimestamp(column, org.embulk.spi.time.Timestamp.ofInstant(timestamp));
     }
 
     private static class TimestampInfo {
